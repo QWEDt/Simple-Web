@@ -2,17 +2,16 @@ package org.qwerris.filmsreviews.service;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.qwerris.filmsreviews.dao.ReviewDao;
+import org.qwerris.filmsreviews.dao.ReviewRepository;
 import org.qwerris.filmsreviews.dto.CreateReviewDto;
-import org.qwerris.filmsreviews.dto.ReviewFilter;
-import org.qwerris.filmsreviews.entity.Film;
-import org.qwerris.filmsreviews.entity.User;
+import org.qwerris.filmsreviews.entity.Review;
 import org.qwerris.filmsreviews.mapper.ReviewDtoMapper;
+import org.qwerris.filmsreviews.utils.HibernateUtil;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReviewService {
     private static final ReviewService INSTANCE = new ReviewService();
-    private final ReviewDao reviewDao = ReviewDao.getInstance();
+    private final ReviewRepository reviewDao = new ReviewRepository(HibernateUtil.getSession());
     private final ReviewDtoMapper reviewDtoMapper = ReviewDtoMapper.getInstance();
 
     public static ReviewService getInstance() {
@@ -20,22 +19,7 @@ public class ReviewService {
     }
 
     public void save(CreateReviewDto createReviewDto) {
-        ReviewFilter reviewFilter = ReviewFilter.builder()
-                .film(Film.builder()
-                        .id(createReviewDto.getFilmId())
-                        .build())
-                .user(User.builder()
-                        .id(createReviewDto.getUser().getId())
-                        .build())
-                .build();
-
-        var foundReview = reviewDao.findAll(reviewFilter);
-        if (foundReview.isEmpty()) {
-            reviewDao.save(reviewDtoMapper.map(createReviewDto));
-        } else {
-            var review = reviewDtoMapper.map(createReviewDto);
-            review.setId(foundReview.iterator().next().getId());
-            reviewDao.update(review);
-        }
+        Review review = reviewDtoMapper.map(createReviewDto);
+        reviewDao.findById(review.getId()).ifPresentOrElse(reviewDao::update, () -> reviewDao.save(review));
     }
 }

@@ -2,14 +2,14 @@ package org.qwerris.filmsreviews.service;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.qwerris.filmsreviews.dao.UserDao;
+import org.qwerris.filmsreviews.dao.UserRepository;
 import org.qwerris.filmsreviews.dto.CreateUserDto;
 import org.qwerris.filmsreviews.dto.UserDto;
-import org.qwerris.filmsreviews.dto.UserFilter;
 import org.qwerris.filmsreviews.entity.User;
 import org.qwerris.filmsreviews.exceptions.ValidationException;
 import org.qwerris.filmsreviews.mapper.CreateUserMapper;
 import org.qwerris.filmsreviews.mapper.UserDtoMapper;
+import org.qwerris.filmsreviews.utils.HibernateUtil;
 import org.qwerris.filmsreviews.validator.CreateUserValidator;
 import org.qwerris.filmsreviews.validator.ValidationResult;
 
@@ -18,7 +18,7 @@ import java.util.Optional;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserService {
     private final static UserService INSTANCE = new UserService();
-    private final UserDao userDao = UserDao.getInstance();
+    private final UserRepository userDao = new UserRepository(HibernateUtil.getSession());
     private final CreateUserValidator createUserValidator = CreateUserValidator.getInstance();
     private final CreateUserMapper createUserMapper = CreateUserMapper.getInstance();
     private final UserDtoMapper userDtoMapper = UserDtoMapper.getInstance();
